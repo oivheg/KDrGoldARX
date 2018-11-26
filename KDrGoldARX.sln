@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.106
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KDrGoldARX", "KDrGoldARX\KDrGoldARX.csproj", "{04831448-48F0-4816-90AC-C0F18F02440E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ARXToKDRGold", "ARXToKDRGold\ARXToKDRGold.csproj", "{4FF9307C-3429-46A8-88C1-A74365C01A1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{04831448-48F0-4816-90AC-C0F18F02440E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04831448-48F0-4816-90AC-C0F18F02440E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04831448-48F0-4816-90AC-C0F18F02440E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FF9307C-3429-46A8-88C1-A74365C01A1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FF9307C-3429-46A8-88C1-A74365C01A1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FF9307C-3429-46A8-88C1-A74365C01A1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FF9307C-3429-46A8-88C1-A74365C01A1A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

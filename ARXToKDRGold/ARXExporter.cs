@@ -33,7 +33,8 @@ namespace ARXToKDRGold
         {
             // write code her to do the job based on my requirements
             //GET DATA FROM ARX WEB REWUEST AUTH BASIC
-
+            ARXXml.GetXML();
+            ARXXml.Sendxml();
             Library.WriteErrorLog("Timer ticked and som job as been done successfully");
         }
 

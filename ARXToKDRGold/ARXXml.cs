@@ -16,6 +16,7 @@ namespace ARXToKDRGold
 
         public static void GetXML()
         {
+            LstUsers.Clear();
             // run http Request against ARX server with basic auth.
             string path = "C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\allusers.xml";
             XmlDocument xml = new XmlDocument();
@@ -37,6 +38,7 @@ namespace ARXToKDRGold
             foreach (XmlNode node in nodePersons)
             {
                 Users User = new Users();
+                User.CardList = new List<string>();
                 for (int i = 0; i < node.ChildNodes.Count; i++)
                 {
                     switch (node.ChildNodes[i].Name)
@@ -73,7 +75,6 @@ namespace ARXToKDRGold
 
                             foreach (Users user in LstUsers)
                             {
-                                user.CardList = new List<string>();
                                 if (user.UserId.Equals(pers_id))
                                 {
                                     var tmpcard = cardnode.SelectSingleNode("number").InnerText;
@@ -93,10 +94,9 @@ namespace ARXToKDRGold
         public static void Sendxml()
         {
             SendDataAsync(LstUsers);
-            LstUsers.Clear();
         }
 
-        private static String Base_URL = "localhost:8080/api/customerimport";
+        private static String Base_URL = "http://localhost:8080/api/customerimport";
         private static HttpResponseMessage Response { get; set; }
 
         public static async void SendDataAsync(Object Users)

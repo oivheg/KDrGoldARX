@@ -9,6 +9,8 @@ namespace KDRGoldConoslenoCore.Controller
 {
     public class CustomerImportController : ApiController
     {
+        private List<Users> LstUsers = new List<Users>();
+
         // GET api/demo
         public IEnumerable<string> Get()
         {
@@ -24,10 +26,10 @@ namespace KDRGoldConoslenoCore.Controller
         // POST api/demo
         public void Post(List<Users> lstUsers)
         {
-            LstUsers = lstUsers;
+            //LstUsers = lstUsers;
+            LstUsers = ImportFactory.CleanData(lstUsers);
+            ImportFactory.GenerateXML(LstUsers);
         }
-
-        private List<Users> LstUsers = new List<Users>();
 
         //// POST api/demo
         //[HttpPost]

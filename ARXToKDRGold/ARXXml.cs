@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -31,6 +34,7 @@ namespace ARXToKDRGold
 
             //xml.Load("C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\enkel bruker.xml");
             xml.Load(path);
+            xml.LoadXml(GetXMLData());
 
             XmlNodeList nodePersons = xml.SelectNodes("//person");
             XmlNodeList nodecards = xml.SelectNodes("//card");
@@ -150,5 +154,29 @@ namespace ARXToKDRGold
                 Library.WriteErrorLog("Host not reacable");
             }
         }
+
+        public static string GetXMLData()
+        {
+            //ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
+            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            //ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
+
+            var request = WebRequest.Create("http://localhost:5004/arx/export") as HttpWebRequest;
+            request.Credentials = new NetworkCredential("master", "4bdk0jf2");
+
+            var response = request.GetResponse();
+
+            Stream receiveStream = response.GetResponseStream();
+            StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+
+            var result = readStream.ReadToEnd();
+
+            return result;
+        }
+
+        //private static bool AcceptAllCertifications(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        //{
+        //    return true;
+        //}
     }
 }

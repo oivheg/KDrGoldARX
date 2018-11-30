@@ -35,13 +35,13 @@ namespace KDRGoldConoslenoCore
         public static void GenerateXML(List<Users> lstusers)
         {
             //SerializeObject(lstusers, "CustomerImport.xml");
-            string filename = "CustImport" + DateTime.Now.ToFileTime();
+            string filename = "CustImport";
             CreateImportXML(lstusers, filename);
         }
 
         internal static void Archive()
         {
-            File.Move(XmlPath + "\\" + XmlFileName, XmlArchivePath + "\\" + XmlFileName); // Try to move
+            File.Move(XmlPath + "\\" + XmlFileName + ".xml", XmlArchivePath + "\\" + XmlFileName + DateTime.Now.ToFileTime() + ".xml"); // Try to move
         }
 
         private static string RemoveExtraText(string value)
@@ -58,7 +58,7 @@ namespace KDRGoldConoslenoCore
         {
             Directory.CreateDirectory(XmlPath);
             Directory.CreateDirectory(XmlArchivePath);
-            XmlWriter xmlWriter = XmlWriter.Create(XmlPath + "\\" + filename);
+            XmlWriter xmlWriter = XmlWriter.Create(XmlPath + "\\" + filename + ".xml");
             XmlFileName = filename;
             xmlWriter.WriteStartDocument();
             xmlWriter.WriteStartElement("Persons");

@@ -13,6 +13,8 @@ namespace ARXToKDRGold
 {
     public partial class ARXExporter : ServiceBase
     {
+        private List<Users> LstUsers = new List<Users>();
+
         public ARXExporter()
         {
             InitializeComponent();
@@ -31,10 +33,13 @@ namespace ARXToKDRGold
 
         private void timer1_Tick(object sender, ElapsedEventArgs e)
         {
+            LstUsers.Clear();
             // write code her to do the job based on my requirements
             //GET DATA FROM ARX WEB REWUEST AUTH BASIC
             ARXXml.GetXML();
-            ARXXml.Sendxml();
+            LstUsers = ARXXml.GetList();
+            LstUsers = ARXXml.CleanXML(LstUsers);
+            ARXXml.Sendxml(LstUsers);
             Library.WriteErrorLog("Timer ticked and som job as been done successfully");
         }
 

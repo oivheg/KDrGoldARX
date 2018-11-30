@@ -29,10 +29,78 @@ namespace ARXTesting
         {
             InitializeComponent();
             GetXML();
-            SendDataAsync(LstUsers);
+            //SendDataAsync(LstUsers);
+            CleanData(LstUsers);
+            CreateImportXML(LstUsers, "test.xml");
+        }
+
+        private void CleanData(List<Users> lstUsers)
+        {
+            //            var replacements = new[]{
+            //                 new{Find="PID:",Replace=""},
+            //                 new{Find="ID:",Replace=""},
+            //                 //new{Find="999",Replace="Word two"},
+            //};
+            foreach (Users user in lstUsers)
+            {
+                user.UserId = RemoveExtraText(user.UserId);
+                //user.UserId = user.UserId.Replace("ID:", "");
+            }
+        }
+
+        private string RemoveExtraText(string value)
+        {
+            var allowedChars = "01234567890";
+            return new string(value.Where(c => allowedChars.Contains(c)).ToArray());
         }
 
         private static List<Users> LstUsers = new List<Users>();
+
+        private static void CreateImportXML(List<Users> lstUsers, string filename)
+        {
+            XmlWriter xmlWriter = XmlWriter.Create(filename);
+
+            xmlWriter.WriteStartDocument();
+            xmlWriter.WriteStartElement("Persons");
+            foreach (Users user in lstUsers)
+            {
+                foreach (string card in user.CardList)
+                {
+                    xmlWriter.WriteStartElement("Person");
+                    //EMPID
+                    xmlWriter.WriteStartElement("EmpID");
+                    xmlWriter.WriteString(user.UserId);
+                    xmlWriter.WriteEndElement();
+                    //FNAME
+                    xmlWriter.WriteStartElement("FName");
+                    xmlWriter.WriteString(user.FirstName);
+                    xmlWriter.WriteEndElement();
+                    //LNAME
+                    xmlWriter.WriteStartElement("LName");
+                    xmlWriter.WriteString(user.LastName);
+                    xmlWriter.WriteEndElement();
+                    //Card
+                    xmlWriter.WriteStartElement("Card");
+                    xmlWriter.WriteString(card);
+                    xmlWriter.WriteEndElement();
+                    //Company
+                    xmlWriter.WriteStartElement("Company");
+                    xmlWriter.WriteString(user.Company);
+                    xmlWriter.WriteEndElement();
+
+                    xmlWriter.WriteEndElement();
+                }
+            }
+
+            //xmlWriter.WriteAttributeString("age", "42");
+
+            //xmlWriter.WriteStartElement("user");
+            //xmlWriter.WriteAttributeString("age", "39");
+            //xmlWriter.WriteString("Jane Doe");
+
+            xmlWriter.WriteEndDocument();
+            xmlWriter.Close();
+        }
 
         public static void GetXML()
         {
@@ -66,9 +134,20 @@ namespace ARXTesting
 
                             break;
 
+                        case "first_name":
+                            User.FirstName = node.ChildNodes[i].InnerText;
+
+                            break;
+
+                        case "last_name":
+                            User.LastName = node.ChildNodes[i].InnerText;
+
+                            break;
+
                         case "extra_fields":
-                            XmlNodeList extrafieldlst = xml.SelectNodes("//extra_field");
-                            foreach (XmlNode field in extrafieldlst)
+                            /*XmlNodeList extrafieldlst = node.ChildNodes.Count()*/
+                            ; ;
+                            foreach (XmlNode field in node.ChildNodes[i].ChildNodes)
                             {
                                 if (field.FirstChild.InnerText.Equals("Gruppe"))
                                 {

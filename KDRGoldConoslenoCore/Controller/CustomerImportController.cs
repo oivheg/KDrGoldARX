@@ -26,9 +26,12 @@ namespace KDRGoldConoslenoCore.Controller
         // POST api/demo
         public void Post(List<Users> lstUsers)
         {
-            //LstUsers = lstUsers;
-            LstUsers = ImportFactory.CleanData(lstUsers);
+            LstUsers.Clear();
+            LstUsers = lstUsers;
+            //LstUsers = ImportFactory.CleanData(lstUsers);
             ImportFactory.GenerateXML(LstUsers);
+            ImportFactory.ImporToKDRGold();
+            ImportFactory.Archive();
         }
 
         //// POST api/demo

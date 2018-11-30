@@ -16,7 +16,6 @@ namespace ARXToKDRGold
 
         public static void GetXML()
         {
-            LstUsers.Clear();
             // run http Request against ARX server with basic auth.
             string path = "C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\allusers.xml";
             XmlDocument xml = new XmlDocument();
@@ -38,7 +37,6 @@ namespace ARXToKDRGold
             foreach (XmlNode node in nodePersons)
             {
                 Users User = new Users();
-                User.CardList = new List<string>();
                 for (int i = 0; i < node.ChildNodes.Count; i++)
                 {
                     switch (node.ChildNodes[i].Name)
@@ -48,9 +46,20 @@ namespace ARXToKDRGold
 
                             break;
 
+                        case "first_name":
+                            User.FirstName = node.ChildNodes[i].InnerText;
+
+                            break;
+
+                        case "last_name":
+                            User.LastName = node.ChildNodes[i].InnerText;
+
+                            break;
+
                         case "extra_fields":
-                            XmlNodeList extrafieldlst = xml.SelectNodes("//extra_field");
-                            foreach (XmlNode field in extrafieldlst)
+                            /*XmlNodeList extrafieldlst = node.ChildNodes.Count()*/
+
+                            foreach (XmlNode field in node.ChildNodes[i].ChildNodes)
                             {
                                 if (field.FirstChild.InnerText.Equals("Gruppe"))
                                 {
@@ -78,7 +87,6 @@ namespace ARXToKDRGold
                                 if (user.UserId.Equals(pers_id))
                                 {
                                     var tmpcard = cardnode.SelectSingleNode("number").InnerText;
-
                                     user.CardList.Add(tmpcard);
                                 }
                             }
@@ -91,9 +99,36 @@ namespace ARXToKDRGold
             }
         }
 
-        public static void Sendxml()
+        public static List<Users> GetList()
         {
-            SendDataAsync(LstUsers);
+            return LstUsers;
+        }
+
+        public static List<Users> CleanXML(List<Users> _lstUSers)
+        {
+            List<Users> TMPLSTUsers = new List<Users>();
+
+            foreach (Users user in _lstUSers)
+            {
+                if (user.CardList.Count > 0)
+                {
+                    user.UserId = RemoveExtraText(user.UserId);
+                    TMPLSTUsers.Add(user);
+                }
+            }
+            LstUsers.Clear();
+            return TMPLSTUsers;
+        }
+
+        private static string RemoveExtraText(string value)
+        {
+            var allowedChars = "01234567890";
+            return new string(value.Where(c => allowedChars.Contains(c)).ToArray());
+        }
+
+        public static void Sendxml(List<Users> _lstUSers)
+        {
+            SendDataAsync(_lstUSers);
         }
 
         private static String Base_URL = "http://localhost:8080/api/customerimport";
@@ -101,11 +136,19 @@ namespace ARXToKDRGold
 
         public static async void SendDataAsync(Object Users)
         {
-            var client = new HttpClient();
-            string json = JsonConvert.SerializeObject(Users);
-            var content = new StringContent(json, Encoding.Unicode, "application/json");
-            var request = new HttpRequestMessage();
-            Response = await client.PostAsync(Base_URL, content).ConfigureAwait(false);
+            try
+            {
+                var client = new HttpClient();
+                string json = JsonConvert.SerializeObject(Users);
+                var content = new StringContent(json, Encoding.Unicode, "application/json");
+                var request = new HttpRequestMessage();
+                Response = await client.PostAsync(Base_URL, content).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                //Host not reacable.
+                Library.WriteErrorLog("Host not reacable");
+            }
         }
     }
 }

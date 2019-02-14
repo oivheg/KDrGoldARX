@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Security;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,9 +18,32 @@ namespace ARXToKDRGold
     {
         private static List<Users> LstUsers = new List<Users>();
 
+        public static void GetDatafromARX()
+        {
+            //Certificates.Instance.GetCertificatesAutomatically();
+            //ServicePointManager.Expect100Continue = true;
+
+            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            var request = WebRequest.Create("http://localhost:5004/arx/export");
+            //authInfo = "master" + ":" + "4bdk0jf2";
+            //authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
+            request.Credentials = new NetworkCredential("master", "4bdk0jf2");
+            request.PreAuthenticate = true;
+
+            //like this:
+            //request.Headers["Authorization"] = "Basic " + authInfo;
+
+            var response = request.GetResponse();
+            using (var streamReader = new StreamReader(response.GetResponseStream()))
+            {
+                var responseText = streamReader.ReadToEnd();
+            }
+        }
+
         public static void GetXML()
         {
             // run http Request against ARX server with basic auth.
+            GetDatafromARX();
             string path = "C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\allusers.xml";
             XmlDocument xml = new XmlDocument();
 

@@ -7,19 +7,26 @@ using System.Threading.Tasks;
 
 namespace ARXToKDRGold
 {
-    static class Program
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        static void Main()
+        private static void Main()
         {
+#if DEBUG
+            ARXExporter service = new ARXExporter();
+            service.onDebug();
+#else
+
             ServiceBase[] ServicesToRun;
             ServicesToRun = new ServiceBase[]
             {
                 new ARXExporter()
             };
             ServiceBase.Run(ServicesToRun);
+
+#endif
         }
     }
 }

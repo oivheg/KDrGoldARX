@@ -22,6 +22,12 @@ namespace ARXToKDRGold
 
         private Timer timer1 = null;
 
+        public void onDebug()
+        {
+            //OnStart(null);
+            ARXXml.GetDatafromARX();
+        }
+
         protected override void OnStart(string[] args)
         {
             timer1 = new Timer();

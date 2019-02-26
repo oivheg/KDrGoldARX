@@ -18,32 +18,35 @@ namespace ARXToKDRGold
     {
         private static List<Users> LstUsers = new List<Users>();
 
-        public static void GetDatafromARX()
-        {
-            //Certificates.Instance.GetCertificatesAutomatically();
-            //ServicePointManager.Expect100Continue = true;
+        //public static string GetDatafromARX()
+        //{
+        //    //Certificates.Instance.GetCertificatesAutomatically();
+        //    //ServicePointManager.Expect100Continue = true;
 
-            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
-            var request = WebRequest.Create("http://localhost:5004/arx/export");
-            //authInfo = "master" + ":" + "4bdk0jf2";
-            //authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
-            request.Credentials = new NetworkCredential("master", "4bdk0jf2");
-            request.PreAuthenticate = true;
+        //    //ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+        //    var request = WebRequest.Create("http://localhost:5004/arx/export");
+        //    //authInfo = "master" + ":" + "4bdk0jf2";
+        //    //authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
+        //    request.Credentials = new NetworkCredential("master", "4bdk0jf2");
+        //    request.PreAuthenticate = true;
 
-            //like this:
-            //request.Headers["Authorization"] = "Basic " + authInfo;
+        //    //like this:
+        //    //request.Headers["Authorization"] = "Basic " + authInfo;
 
-            var response = request.GetResponse();
-            using (var streamReader = new StreamReader(response.GetResponseStream()))
-            {
-                var responseText = streamReader.ReadToEnd();
-            }
-        }
+        //    var response = request.GetResponse();
+        //    var responseText = "";
+        //    using (var streamReader = new StreamReader(response.GetResponseStream()))
+        //    {
+        //         responseText = streamReader.ReadToEnd();
+        //    }
+
+        //    return responseText;
+        //}
 
         public static void GetXML()
         {
             // run http Request against ARX server with basic auth.
-            GetDatafromARX();
+
             string path = "C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\allusers.xml";
             XmlDocument xml = new XmlDocument();
 
@@ -56,15 +59,16 @@ namespace ARXToKDRGold
             XmlElement root = xml.DocumentElement;
             xml.InsertBefore(xmldecl, root);
 
-            //xml.Load("C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\enkel bruker.xml");
-            xml.Load(path);
-            xml.LoadXml(GetXMLData());
+            xml.Load("C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\exportarx.xml");
+            //xml.Load(path);
+            //xml.LoadXml(GetXMLData());
 
             XmlNodeList nodePersons = xml.SelectNodes("//person");
             XmlNodeList nodecards = xml.SelectNodes("//card");
             foreach (XmlNode node in nodePersons)
             {
                 Users User = new Users();
+                User.Kantine = false;
                 for (int i = 0; i < node.ChildNodes.Count; i++)
                 {
                     switch (node.ChildNodes[i].Name)
@@ -91,14 +95,32 @@ namespace ARXToKDRGold
                             {
                                 if (field.FirstChild.InnerText.Equals("Gruppe"))
                                 {
-                                    User.Company = field.SelectSingleNode("value").InnerText;
+                                    //User.Company = field.SelectSingleNode("value").InnerText;
+                                }
+                                if (field.FirstChild.InnerText.Equals("Kantine"))
+                                {
+                                    if (field.SelectSingleNode("value").InnerText != null)
+                                    {
+                                        if (!field.SelectSingleNode("value").InnerText.Equals(""))
+                                        {
+                                            User.Company = field.SelectSingleNode("value").InnerText;
+                                            User.Kantine = true;
+                                        }
+                                    }
                                 }
                             }
 
                             break;
                     }
                 }
-                LstUsers.Add(User);
+                if (User.Kantine)
+                {
+                    LstUsers.Add(User);
+                }
+                else
+                {
+                    //User non in kantine
+                }
             }
 
             foreach (XmlNode cardnode in nodecards)
@@ -159,7 +181,7 @@ namespace ARXToKDRGold
             SendDataAsync(_lstUSers);
         }
 
-        private static String Base_URL = "http://localhost:8080/api/customerimport";
+        private static String Base_URL = Data.Base_URL;
         private static HttpResponseMessage Response { get; set; }
 
         public static async void SendDataAsync(Object Users)
@@ -170,7 +192,7 @@ namespace ARXToKDRGold
                 string json = JsonConvert.SerializeObject(Users);
                 var content = new StringContent(json, Encoding.Unicode, "application/json");
                 var request = new HttpRequestMessage();
-                Response = await client.PostAsync(Base_URL, content).ConfigureAwait(false);
+                Response = await client.PostAsync(Base_URL, content).ConfigureAwait(true);
             }
             catch (Exception)
             {
@@ -186,7 +208,7 @@ namespace ARXToKDRGold
             //ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
 
             var request = WebRequest.Create("http://localhost:5004/arx/export") as HttpWebRequest;
-            request.Credentials = new NetworkCredential("master", "4bdk0jf2");
+            request.Credentials = new NetworkCredential(Data.NetworkCredentialUser, Data.NetworkCredentialPass);
 
             var response = request.GetResponse();
 

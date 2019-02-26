@@ -8,7 +8,7 @@ using Topshelf;
 
 namespace KDRGoldConoslenoCore
 {
-    internal class Program
+    internal static class Program
     {
         private static void Main(string[] args)
         {
@@ -20,6 +20,8 @@ namespace KDRGoldConoslenoCore
                     s.WhenStarted(tc => tc.Start());
                     s.WhenStopped(tc => tc.Stop());
                 });
+
+                //x.RunAsNetworkService();
                 x.RunAsLocalSystem();
                 x.SetDisplayName("ImportToGold");
                 x.SetDescription("Web Service for Recieving customer data and importing to KDRGold");

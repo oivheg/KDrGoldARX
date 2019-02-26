@@ -25,7 +25,15 @@ namespace ARXToKDRGold
         public void onDebug()
         {
             //OnStart(null);
-            ARXXml.GetDatafromARX();
+            //ARXXml.GetDatafromARX();
+            LstUsers.Clear();
+            // write code her to do the job based on my requirements
+            //GET DATA FROM ARX WEB REWUEST AUTH BASIC
+            ARXXml.GetXML();
+            LstUsers = ARXXml.GetList();
+            LstUsers = ARXXml.CleanXML(LstUsers);
+            ARXXml.Sendxml(LstUsers);
+            Library.WriteErrorLog("Timer ticked and som job as been done successfully");
         }
 
         protected override void OnStart(string[] args)

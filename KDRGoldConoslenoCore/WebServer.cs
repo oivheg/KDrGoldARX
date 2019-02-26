@@ -13,7 +13,7 @@ namespace KDRGoldConoslenoCore
 
         public void Start()
         {
-            _webap = WebApp.Start<Startup>("http://localhost:8080");
+            _webap = WebApp.Start<Startup>("http://*:8080");
         }
 
         public void Stop()

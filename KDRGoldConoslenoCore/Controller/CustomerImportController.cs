@@ -14,6 +14,17 @@ namespace KDRGoldConoslenoCore.Controller
         // GET api/demo
         public IEnumerable<string> Get()
         {
+            Users usr = new Users();
+            usr.Company = "test";
+            usr.FirstName = "Ølberget";
+            usr.LastName = "lastname";
+            usr.UserId = "999";
+
+            usr.CardList.Add("12345");
+
+            LstUsers.Add(usr);
+            ImportFactory.GenerateXML(LstUsers);
+            bool succesess = ImportFactory.ImporToKDRGold();
             return new string[] { "Hello", "World" };
         }
 
@@ -30,8 +41,9 @@ namespace KDRGoldConoslenoCore.Controller
             LstUsers = lstUsers;
             //LstUsers = ImportFactory.CleanData(lstUsers);
             ImportFactory.GenerateXML(LstUsers);
-            ImportFactory.ImporToKDRGold();
-            ImportFactory.Archive();
+            bool succesess = ImportFactory.ImporToKDRGold();
+
+            ImportFactory.Archive(succesess);
         }
 
         //// POST api/demo

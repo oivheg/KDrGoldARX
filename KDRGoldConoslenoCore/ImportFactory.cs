@@ -2,7 +2,9 @@
 using Microsoft.SqlServer.Management.Smo;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -39,9 +41,15 @@ namespace KDRGoldConoslenoCore
             CreateImportXML(lstusers, filename);
         }
 
-        internal static void Archive()
+        internal static void Archive(bool sucsess)
         {
-            File.Move(XmlPath + "\\" + XmlFileName + ".xml", XmlArchivePath + "\\" + XmlFileName + DateTime.Now.ToFileTime() + ".xml"); // Try to move
+            if (sucsess)
+            {
+                File.Move(XmlPath + "\\" + XmlFileName + ".xml", XmlArchivePath + "\\" + XmlFileName + DateTime.Now.ToFileTime() + ".xml"); // Try to move
+            }
+            else
+            {
+            }
         }
 
         private static string RemoveExtraText(string value)
@@ -58,9 +66,14 @@ namespace KDRGoldConoslenoCore
         {
             Directory.CreateDirectory(XmlPath);
             Directory.CreateDirectory(XmlArchivePath);
-            XmlWriter xmlWriter = XmlWriter.Create(XmlPath + "\\" + filename + ".xml");
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Encoding = Encoding.Unicode;
+            XmlWriter xmlWriter = XmlWriter.Create(XmlPath + "\\" + filename + ".xml", settings);
+
             XmlFileName = filename;
+
             xmlWriter.WriteStartDocument();
+
             xmlWriter.WriteStartElement("Persons");
             foreach (Users user in lstUsers)
             {
@@ -105,18 +118,75 @@ namespace KDRGoldConoslenoCore
         //    }
         //}
 
-        public static void ImporToKDRGold()
+        public static bool ImporToKDRGold()
         {
-            //string sqlConnectionString = @"Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=hegglandtest;Data Source=HEGGLAND\HEGGLAND";
-            string sqlConnectionString = @"Server=HEGGLAND\HEGGLAND;Database=HegglandTEst;Integrated Security=True;Trusted_Connection=True;MultipleActiveResultSets=true";
+            try
+            {
+                //string sqlConnectionString = @"Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=hegglandtest;Data Source=HEGGLAND\HEGGLAND";
+                string sqlConnectionString = Data.ServerString;
+                //string sqlConnectionString = @"Server=HEGGLAND\HEGGLAND;Database=KDRGoldDemoKDRSNy;Integrated Security=True;Trusted_Connection=True;MultipleActiveResultSets=true";
 
-            string script = File.ReadAllText(@"C:\Users\oivhe\OneDrive - KDR Stavanger AS\ARX Integrasjon\KDR_Import_KunderOgKortARX_ BETTER.sql");
+                //string script = File.ReadAllText(@"C:\ArxImporter\KDR_Import_KunderOgKortARX_ BETTER.sql");
+                XmlDocument xmlToSave = new XmlDocument();
+                xmlToSave.Load("C:\\ARXGOld\\XMLFIles\\CustImport.xml");
+                string xml = File.ReadAllText("C:\\ARXGOld\\XMLFIles\\CustImport.xml");
+                //xml.Replace("<? xml version =\"1.0\" encoding=\"utf-8\"?>", "");
+                SqlConnection conn = new SqlConnection(sqlConnectionString);
 
-            SqlConnection conn = new SqlConnection(sqlConnectionString);
+                //  using (var command = new SqlCommand("Import_ArxCustomers", conn)
+                //  {
+                //      CommandType = CommandType.StoredProcedure
+                //  })
 
-            Server server = new Server(new ServerConnection(conn));
+                //  {
+                //      command.Parameters.Add(
+                //new SqlParameter("@xml", SqlDbType.Xml)
+                //{
+                //    Value = new SqlXml(new XmlTextReader(xmlToSave.InnerXml
+                //               , XmlNodeType.Document, null))
+                //});
+                //      conn.Open();
+                //      command.ExecuteNonQuery();
+                //  }
 
-            server.ConnectionContext.ExecuteNonQuery(script);
+                using (SqlCommand cmd = new SqlCommand("Import_ArxCustomers"))
+                {
+                    cmd.Connection = conn;
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@XmlVal", xml);
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                    conn.Close();
+                }
+                //Server server = new Server(new ServerConnection(conn));
+
+                //server.ConnectionContext.ExecuteNonQuery(script);
+                return true;
+            }
+            catch (Exception e)
+            {
+                string filePath = @"C:\Error.txt";
+
+                Exception ex = e;
+
+                using (StreamWriter writer = new StreamWriter(filePath, true))
+                {
+                    writer.WriteLine("-----------------------------------------------------------------------------");
+                    writer.WriteLine("Date : " + DateTime.Now.ToString());
+                    writer.WriteLine();
+
+                    while (ex != null)
+                    {
+                        writer.WriteLine(ex.GetType().FullName);
+                        writer.WriteLine("Message : " + ex.Message);
+                        writer.WriteLine("StackTrace : " + ex.StackTrace);
+
+                        ex = ex.InnerException;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

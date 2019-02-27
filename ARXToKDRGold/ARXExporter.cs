@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ARXToKDRGold.Communication;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,7 +23,7 @@ namespace ARXToKDRGold
 
         private Timer timer1 = null;
 
-        public void onDebug()
+        public async Task onDebugAsync()
         {
             //OnStart(null);
             //ARXXml.GetDatafromARX();
@@ -32,14 +33,14 @@ namespace ARXToKDRGold
             ARXXml.GetXML();
             LstUsers = ARXXml.GetList();
             LstUsers = ARXXml.CleanXML(LstUsers);
-            ARXXml.Sendxml(LstUsers);
-            Library.WriteErrorLog("Timer ticked and som job as been done successfully");
+
+            //Library.WriteErrorLog("Timer ticked and som job as been done successfully");
         }
 
         protected override void OnStart(string[] args)
         {
             timer1 = new Timer();
-            this.timer1.Interval = 30000;
+            this.timer1.Interval = 10000;
             this.timer1.Elapsed += new System.Timers.ElapsedEventHandler(this.timer1_Tick);
             timer1.Enabled = true;
             Library.WriteErrorLog("Test window service started");
@@ -50,10 +51,14 @@ namespace ARXToKDRGold
             LstUsers.Clear();
             // write code her to do the job based on my requirements
             //GET DATA FROM ARX WEB REWUEST AUTH BASIC
+#if DEBUG
             ARXXml.GetXML();
+#else
+            ARXXml.GetXMLData();
+#endif
             LstUsers = ARXXml.GetList();
             LstUsers = ARXXml.CleanXML(LstUsers);
-            ARXXml.Sendxml(LstUsers);
+            ARXXml.SendxmlAsync(LstUsers);
             Library.WriteErrorLog("Timer ticked and som job as been done successfully");
         }
 

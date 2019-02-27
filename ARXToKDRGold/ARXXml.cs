@@ -1,13 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using ARXToKDRGold.Communication;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Security;
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -47,7 +46,7 @@ namespace ARXToKDRGold
         {
             // run http Request against ARX server with basic auth.
 
-            string path = "C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\allusers.xml";
+            //string path = "C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\allusers.xml";
             XmlDocument xml = new XmlDocument();
 
             XmlDeclaration xmldecl;
@@ -59,7 +58,7 @@ namespace ARXToKDRGold
             XmlElement root = xml.DocumentElement;
             xml.InsertBefore(xmldecl, root);
 
-            xml.Load("C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\exportarx.xml");
+            xml.Load("C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\export1.xml");
             //xml.Load(path);
             //xml.LoadXml(GetXMLData());
 
@@ -176,30 +175,32 @@ namespace ARXToKDRGold
             return new string(value.Where(c => allowedChars.Contains(c)).ToArray());
         }
 
-        public static void Sendxml(List<Users> _lstUSers)
+        public static async void SendxmlAsync(List<Users> _lstUSers)
         {
-            SendDataAsync(_lstUSers);
+            //SendDataAsync(_lstUSers);
+            //await HttpRequest.Post(_lstUSers, "customerimport").ConfigureAwait(false);
+            await HttpRequest.Post(_lstUSers, "customerimport").ConfigureAwait(true);
         }
 
-        private static String Base_URL = Data.Base_URL;
-        private static HttpResponseMessage Response { get; set; }
+        //private static String Base_URL = "http://localhost:8080/api/customerimport";
+        //private static HttpResponseMessage Response { get; set; }
 
-        public static async void SendDataAsync(Object Users)
-        {
-            try
-            {
-                var client = new HttpClient();
-                string json = JsonConvert.SerializeObject(Users);
-                var content = new StringContent(json, Encoding.Unicode, "application/json");
-                var request = new HttpRequestMessage();
-                Response = await client.PostAsync(Base_URL, content).ConfigureAwait(true);
-            }
-            catch (Exception)
-            {
-                //Host not reacable.
-                Library.WriteErrorLog("Host not reacable");
-            }
-        }
+        //public static async void SendDataAsync(Object Users)
+        //{
+        //    try
+        //    {
+        //        var client = new HttpClient();
+        //        string json = JsonConvert.SerializeObject(Users);
+        //        var content = new StringContent(json, Encoding.Unicode, "application/json");
+        //        var request = new HttpRequestMessage();
+        //        Response = await client.PostAsync(Base_URL, content).ConfigureAwait(false);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        //Host not reacable.
+        //        Library.WriteErrorLog("Host not reacable");
+        //    }
+        //}
 
         public static string GetXMLData()
         {

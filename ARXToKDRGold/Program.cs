@@ -1,10 +1,10 @@
-﻿using System;
+﻿using ARXToKDRGold.Communication;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
-using Topshelf;
 
 namespace ARXToKDRGold
 {
@@ -16,8 +16,26 @@ namespace ARXToKDRGold
         private static void Main()
         {
 #if DEBUG
-            ARXExporter service = new ARXExporter();
-            service.onDebug();
+
+            MainAsync().Wait();
+            //HttpRequest.Get("customerimport").ConfigureAwait(true).GetAwaiter();
+        }
+
+        private static async Task MainAsync()
+        {
+            try
+            {
+                ARXExporter service = new ARXExporter();
+                await service.onDebugAsync();
+
+                Console.WriteLine("Program finished");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
 #else
 
             ServiceBase[] ServicesToRun;
@@ -28,6 +46,6 @@ namespace ARXToKDRGold
             ServiceBase.Run(ServicesToRun);
 
 #endif
-        }
     }
+}
 }

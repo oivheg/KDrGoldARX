@@ -46,6 +46,17 @@ namespace KDRGoldConoslenoCore
             if (sucsess)
             {
                 File.Move(XmlPath + "\\" + XmlFileName + ".xml", XmlArchivePath + "\\" + XmlFileName + DateTime.Now.ToFileTime() + ".xml"); // Try to move
+                string[] files = Directory.GetFiles(XmlArchivePath);
+
+                foreach (string file in files)
+                {
+                    FileInfo fi = new FileInfo(file);
+
+                    if (fi.LastAccessTime < DateTime.Now.AddMonths(-1))
+                    {
+                        fi.Delete();
+                    }
+                }
             }
             else
             {
@@ -64,49 +75,60 @@ namespace KDRGoldConoslenoCore
 
         private static void CreateImportXML(List<Users> lstUsers, string filename)
         {
-            Directory.CreateDirectory(XmlPath);
-            Directory.CreateDirectory(XmlArchivePath);
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.Encoding = Encoding.Unicode;
-            XmlWriter xmlWriter = XmlWriter.Create(XmlPath + "\\" + filename + ".xml", settings);
-
-            XmlFileName = filename;
-
-            xmlWriter.WriteStartDocument();
-
-            xmlWriter.WriteStartElement("Persons");
-            foreach (Users user in lstUsers)
+            try
             {
-                foreach (string card in user.CardList)
+                Directory.CreateDirectory(XmlPath);
+                Directory.CreateDirectory(XmlArchivePath);
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.Encoding = Encoding.Unicode;
+                XmlWriter xmlWriter = XmlWriter.Create(XmlPath + "\\" + filename + ".xml", settings);
+
+                XmlFileName = filename;
+
+                xmlWriter.WriteStartDocument();
+
+                xmlWriter.WriteStartElement("Persons");
+                foreach (Users user in lstUsers)
                 {
-                    xmlWriter.WriteStartElement("Person");
-                    //EMPID
-                    xmlWriter.WriteStartElement("EmpID");
-                    xmlWriter.WriteString(user.UserId);
-                    xmlWriter.WriteEndElement();
-                    //FNAME
-                    xmlWriter.WriteStartElement("FName");
-                    xmlWriter.WriteString(user.FirstName);
-                    xmlWriter.WriteEndElement();
-                    //LNAME
-                    xmlWriter.WriteStartElement("LName");
-                    xmlWriter.WriteString(user.LastName);
-                    xmlWriter.WriteEndElement();
-                    //Card
-                    xmlWriter.WriteStartElement("Card");
-                    xmlWriter.WriteString(card);
-                    xmlWriter.WriteEndElement();
-                    //Company
-                    xmlWriter.WriteStartElement("Company");
-                    xmlWriter.WriteString(user.Company);
-                    xmlWriter.WriteEndElement();
+                    foreach (string card in user.CardList)
+                    {
+                        xmlWriter.WriteStartElement("Person");
+                        //EMPID
+                        xmlWriter.WriteStartElement("EmpID");
+                        xmlWriter.WriteString(user.UserId);
+                        xmlWriter.WriteEndElement();
+                        //FNAME
+                        xmlWriter.WriteStartElement("FName");
+                        xmlWriter.WriteString(user.FirstName);
+                        xmlWriter.WriteEndElement();
+                        //LNAME
+                        xmlWriter.WriteStartElement("LName");
+                        xmlWriter.WriteString(user.LastName);
+                        xmlWriter.WriteEndElement();
+                        //Card
+                        xmlWriter.WriteStartElement("Card");
+                        xmlWriter.WriteString(card);
+                        xmlWriter.WriteEndElement();
+                        //Company
+                        xmlWriter.WriteStartElement("Company");
+                        xmlWriter.WriteString(user.Company);
+                        xmlWriter.WriteEndElement();
+                        //Company
+                        xmlWriter.WriteStartElement("CardType");
+                        xmlWriter.WriteString(user.CardType.ToString());
+                        xmlWriter.WriteEndElement();
 
-                    xmlWriter.WriteEndElement();
+                        xmlWriter.WriteEndElement();
+                    }
                 }
-            }
 
-            xmlWriter.WriteEndDocument();
-            xmlWriter.Close();
+                xmlWriter.WriteEndDocument();
+                xmlWriter.Close();
+            }
+            catch (Exception e)
+            {
+                string SeError = "Error see details in " + ImportFactory.ErrorReport(e);
+            }
         }
 
         //public static void SerializeObject(this List<Users> list, string fileName)
@@ -166,27 +188,33 @@ namespace KDRGoldConoslenoCore
             }
             catch (Exception e)
             {
-                string filePath = @"C:\Error.txt";
-
-                Exception ex = e;
-
-                using (StreamWriter writer = new StreamWriter(filePath, true))
-                {
-                    writer.WriteLine("-----------------------------------------------------------------------------");
-                    writer.WriteLine("Date : " + DateTime.Now.ToString());
-                    writer.WriteLine();
-
-                    while (ex != null)
-                    {
-                        writer.WriteLine(ex.GetType().FullName);
-                        writer.WriteLine("Message : " + ex.Message);
-                        writer.WriteLine("StackTrace : " + ex.StackTrace);
-
-                        ex = ex.InnerException;
-                    }
-                }
+                ErrorReport(e);
             }
             return false;
+        }
+
+        public static string ErrorReport(Exception e)
+        {
+            string filePath = @"C:\Error.txt";
+
+            Exception ex = e;
+
+            using (StreamWriter writer = new StreamWriter(filePath, true))
+            {
+                writer.WriteLine("-----------------------------------------------------------------------------");
+                writer.WriteLine("Date : " + DateTime.Now.ToString());
+                writer.WriteLine();
+
+                while (ex != null)
+                {
+                    writer.WriteLine(ex.GetType().FullName);
+                    writer.WriteLine("Message : " + ex.Message);
+                    writer.WriteLine("StackTrace : " + ex.StackTrace);
+
+                    ex = ex.InnerException;
+                }
+            }
+            return filePath;
         }
     }
 }

@@ -26,7 +26,7 @@ namespace ARXToKDRGold
             try
             {
                 ARXExporter service = new ARXExporter();
-                await service.onDebugAsync();
+                await service.OnDebugAsync();
 
                 Console.WriteLine("Program finished");
             }
@@ -44,8 +44,8 @@ namespace ARXToKDRGold
                 new ARXExporter()
             };
             ServiceBase.Run(ServicesToRun);
+        }
 
 #endif
     }
-}
 }

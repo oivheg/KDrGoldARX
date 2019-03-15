@@ -12,13 +12,14 @@ namespace ARXToKDRGold.Communication
         private static HttpResponseMessage Response { get; set; }
         public static String Jsonresponse { get; set; }
 
-        public static async Task Post(Object user, String _Command)
+        public static async Task PostAsync(Object user, String _Command)
         {
             var client = new HttpClient();
             string json = JsonConvert.SerializeObject(user);
             var content = new StringContent(json, Encoding.Unicode, "application/json");
             var request = new HttpRequestMessage();
-            Response = await client.PostAsync(Base_URL + _Command, content).ConfigureAwait(false);
+            string tmp = Base_URL + _Command;
+            Response = await client.PostAsync(tmp, content);
         }
 
         public static async Task<Boolean> PostMasterKey(Object user, String _Command)

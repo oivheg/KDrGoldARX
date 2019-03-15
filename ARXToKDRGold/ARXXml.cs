@@ -57,10 +57,14 @@ namespace ARXToKDRGold
             // Add the new node to the document.
             XmlElement root = xml.DocumentElement;
             xml.InsertBefore(xmldecl, root);
-
-            xml.Load("C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\export1.xml");
-            //xml.Load(path);
+#if DEBUG
+            xml.Load("C:\\Users\\oivhe\\OneDrive - KDR Stavanger AS\\ARX Integrasjon\\KDRIMPORT\\export.xml");
             //xml.LoadXml(GetXMLData());
+
+#else
+            xml.LoadXml(GetXMLData());
+#endif
+            //xml.Load(path);
 
             XmlNodeList nodePersons = xml.SelectNodes("//person");
             XmlNodeList nodecards = xml.SelectNodes("//card");
@@ -102,8 +106,13 @@ namespace ARXToKDRGold
                                     {
                                         if (!field.SelectSingleNode("value").InnerText.Equals(""))
                                         {
+                                            User.CardType = 2;
                                             User.Company = field.SelectSingleNode("value").InnerText;
                                             User.Kantine = true;
+                                            if (User.Company.Contains("Debit"))
+                                            {
+                                                User.CardType = 1;
+                                            }
                                         }
                                     }
                                 }
@@ -175,11 +184,13 @@ namespace ARXToKDRGold
             return new string(value.Where(c => allowedChars.Contains(c)).ToArray());
         }
 
-        public static async void SendxmlAsync(List<Users> _lstUSers)
+        public static async
+        Task
+SendxmlAsync(List<Users> _lstUSers)
         {
             //SendDataAsync(_lstUSers);
             //await HttpRequest.Post(_lstUSers, "customerimport").ConfigureAwait(false);
-            await HttpRequest.Post(_lstUSers, "customerimport").ConfigureAwait(true);
+            await HttpRequest.PostAsync(_lstUSers, "Customerimport").ConfigureAwait(true);
         }
 
         //private static String Base_URL = "http://localhost:8080/api/customerimport";
@@ -207,14 +218,29 @@ namespace ARXToKDRGold
             //ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072;
             //ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
             //ServicePointManager.ServerCertificateValidationCallback = new System.Net.Security.RemoteCertificateValidationCallback(AcceptAllCertifications);
+            String ExportType = "http://arx:5004/arx/export";
+            String sDate = DateTime.Now.AddDays(-1).ToString();
+            DateTime datevalue = (Convert.ToDateTime(sDate));
 
-            var request = WebRequest.Create("http://localhost:5004/arx/export") as HttpWebRequest;
+            String dy = datevalue.Day.ToString();
+            String mn = datevalue.Month.ToString();
+            String yy = datevalue.Year.ToString();
+            if (ARXExporter.exportType.Equals("day"))
+            {
+                ExportType = "http://arx:5004/arx/export?updated_since=" + yy + "-" + mn + "-" + dy + "+18:00:00";
+            }
+            else if (ARXExporter.exportType.Equals("all"))
+            {
+                ExportType = "http://arx:5004/arx/export";
+            }
+
+            var request = WebRequest.Create(ExportType) as HttpWebRequest;
             request.Credentials = new NetworkCredential(Data.NetworkCredentialUser, Data.NetworkCredentialPass);
 
             var response = request.GetResponse();
 
             Stream receiveStream = response.GetResponseStream();
-            StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+            StreamReader readStream = new StreamReader(receiveStream);
 
             var result = readStream.ReadToEnd();
 

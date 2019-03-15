@@ -12,20 +12,27 @@ namespace KDRGoldConoslenoCore.Controller
         private List<Users> LstUsers = new List<Users>();
 
         // GET api/demo
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            Users usr = new Users();
-            usr.Company = "test";
-            usr.FirstName = "Ølberget";
-            usr.LastName = "lastname";
-            usr.UserId = "999";
+            try
+            {
+                Users usr = new Users();
+                usr.Company = "test";
+                usr.FirstName = "Ølberget";
+                usr.LastName = "lastname";
+                usr.UserId = "999";
 
-            usr.CardList.Add("12345");
+                usr.CardList.Add("12345");
 
-            LstUsers.Add(usr);
-            ImportFactory.GenerateXML(LstUsers);
-            bool succesess = ImportFactory.ImporToKDRGold();
-            return new string[] { "Hello", "World" };
+                LstUsers.Add(usr);
+                ImportFactory.GenerateXML(LstUsers);
+                bool succesess = ImportFactory.ImporToKDRGold();
+            }
+            catch (Exception e)
+            {
+                return "Error see details in " + ImportFactory.ErrorReport(e);
+            }
+            return "OK";
         }
 
         // GET api/demo/5
@@ -37,13 +44,20 @@ namespace KDRGoldConoslenoCore.Controller
         // POST api/demo
         public void Post(List<Users> lstUsers)
         {
-            LstUsers.Clear();
-            LstUsers = lstUsers;
-            //LstUsers = ImportFactory.CleanData(lstUsers);
-            ImportFactory.GenerateXML(LstUsers);
-            bool succesess = ImportFactory.ImporToKDRGold();
+            try
+            {
+                LstUsers.Clear();
+                LstUsers = lstUsers;
+                //LstUsers = ImportFactory.CleanData(lstUsers);
+                ImportFactory.GenerateXML(LstUsers);
+                bool succesess = ImportFactory.ImporToKDRGold();
 
-            ImportFactory.Archive(succesess);
+                ImportFactory.Archive(succesess);
+            }
+            catch (Exception e)
+            {
+                string SeError = "Error see details in " + ImportFactory.ErrorReport(e);
+            }
         }
 
         //// POST api/demo
